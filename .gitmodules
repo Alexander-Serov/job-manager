@@ -1,0 +1,3 @@
+[submodule "py-filelock"]
+	path = py-filelock
+	url = https://github.com/benediktschmitt/py-filelock
