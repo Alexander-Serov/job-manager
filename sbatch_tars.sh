@@ -1,10 +1,10 @@
 #! /bin/bash
 
 # Sbatch options
-#SBATCH -J ito-man
+#SBATCH -J dif-lat
 #SBATCH -p dbc_pmo
 #SBATCH --qos=dbc
-#SBATCH --cpus-per-task=1 
+#SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=1200MB
 
 
@@ -19,7 +19,7 @@ logs_folder="./logs/"
 # Launch srun with these argument sequence
 module load Python/3.6.0
 echo $argument
-srun -o "${logs_folder}log_job_${SLURM_ARRAY_TASK_ID}.out" -e "${logs_folder}log_job_${SLURM_ARRAY_TASK_ID}.err" -J "${SLURM_ARRAY_TASK_ID}" python3 job_manager.py
+srun -o "${logs_folder}log_job_${SLURM_ARRAY_TASK_ID}.out" -e "${logs_folder}log_job_${SLURM_ARRAY_TASK_ID}.err" -J "${SLURM_ARRAY_TASK_ID}" python3 ./job-manager/job_manager.py
 
 
 
