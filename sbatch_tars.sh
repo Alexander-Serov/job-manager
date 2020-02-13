@@ -1,11 +1,14 @@
 #! /bin/bash
 
 # Sbatch options
-#SBATCH -J ito-man
+#SBATCH -J out-of
 #SBATCH -p dbc_pmo
 #SBATCH --qos=dbc
-#SBATCH --cpus-per-task=1 
-#SBATCH --mem-per-cpu=1200MB
+##### SBATCH --qos=fast
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=300MB
+#SBATCH --mail-type=END, --mail-user=alexander.serov@pasteur.fr
+
 
 
 
@@ -17,9 +20,9 @@ logs_folder="./logs/"
 # argument=`awk "NR==${SLURM_ARRAY_TASK_ID}" $args_file`
 
 # Launch srun with these argument sequence
-module load Python/3.6.0
+module load Python/3.7.2
 echo $argument
-srun -o "${logs_folder}log_job_${SLURM_ARRAY_TASK_ID}.out" -e "${logs_folder}log_job_${SLURM_ARRAY_TASK_ID}.err" -J "${SLURM_ARRAY_TASK_ID}" python3 job_manager.py
+srun -o "${logs_folder}log_job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.out" -e "${logs_folder}log_job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.out" -J "${SLURM_ARRAY_TASK_ID}" python3 job_manager.py $1 $SLURM_ARRAY_JOB_ID
 
 
 
