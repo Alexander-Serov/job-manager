@@ -12,9 +12,10 @@ isort:skip_file
 import os  # for shell execution of the code
 import sys
 from filelock import FileLock, Timeout  # for file locks
-from constants import lock_timeout, position_file, stop_file
+from constants import lock_timeout, stop_file
 import warnings
 import time
+import traceback
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from calculate import simulate_and_calculate_Bayes_factor_terminal as main  # actual calculations
@@ -22,7 +23,7 @@ from stopwatch import stopwatch
 
 EXIT_SUCCESS = 0
 EXIT_INTERRUPTED = 'Program interrupted per user request'
-EXIT_TIMEOUT = 'Timeout waiting for lock on the position file'
+EXIT_TIMEOUT = 0    # 'Timeout waiting for lock on the position file'
 EXIT_PARENT_UNEXPECTED = 'Unexpected parent exit. This line should not have been reached.'
 
 time_start = time.time()
@@ -31,7 +32,7 @@ time_start = time.time()
 if len(sys.argv) > 1:
     args_file = sys.argv[1]
     args_basename = os.path.splitext(os.path.basename(args_file))[0]
-    position_file = args_basename + "_position.dat"
+    position_file = args_basename + ".pos"
     print(f'Processing arguments from "{args_file}". Position tracking file: "{position_file}".')
 else:
     raise RuntimeError('You must provide the name of the arguments file to the "job_manager.py" '
@@ -117,8 +118,9 @@ def read_and_calculate():
                         print(f"Encountered unhandled exception while calculating line #{next_i} "
                               f"with parameters '" + cur_args + "'.")
                         print('Exception:\n', e)
+                        traceback.print_exc()
                         # print('Skipping.')
-                        raise(e)
+                        # raise(e)
 
                     check_stop()
                     next_i = get_next_line()

@@ -6,6 +6,7 @@ import os  # for file operations
 import socket  # for netowrk hostname
 import subprocess  # for launching detached processes on a local PC
 import sys  # to set exit codes
+import shutil
 
 import numpy as np
 
@@ -16,11 +17,12 @@ arg_parser = argparse.ArgumentParser(
     description='Job manager. You must choose whether to resume simulations or restart and regenerate the arguments file')
 arg_parser.add_argument('args_file', action='store', nargs='?', type=str, default='arguments.dat')
 arg_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + str(version))
-arg_parser.add_argument('--common', dest='common', action='store_true')
 
 mode_group = arg_parser.add_mutually_exclusive_group(required=True)
 mode_group.add_argument('--restart', action='store_true')
 mode_group.add_argument('--resume', action='store_true')
+
+arg_parser.add_argument('--common', dest='common', action='store_true')
 
 # dedicated_group = arg_parser.add_mutually_exclusive_group()
 # dedicated_group.add_argument('--dedicated', dest='dedicated', action='store_true')
@@ -52,8 +54,60 @@ input_args = arg_parser.parse_args()
 bl_restart = input_args.restart
 args_file = input_args.args_file
 
+
+def get_position_file(args_file):
+    args_basename = os.path.splitext(os.path.basename(args_file))[0]
+    position_file = args_basename + ".pos"
+    return position_file
+
+
+# if bl_restart:
+#     # args_basename = os.path.splitext(os.path.basename(args_file))[0]
+#     # position_file = args_basename + "_position.dat"
+#     try:
+#         os.unlink(get_position_file(args_file))
+#     except Exception:
+#         pass
+#     print('Position file reset.')
+# else:
+#     print("Resuming from the last calculated position.")
+
+
+if args_file == 'arguments.dat':
+    # Find the next free arguments file name
+    args_files_limit = 10000
+    args_file_base, ext = os.path.splitext(os.path.basename(args_file))
+
+
+    def get_args_file(i): return args_file_base + f'_{i:d}' + ext
+
+
+    success = False
+    for i in range(args_files_limit):
+        try:
+            with open(get_args_file(i), 'r'):
+                pass
+        except FileNotFoundError:
+            success = True
+            break
+
+    if not success:
+        raise RuntimeError('No free arguments file names left. Please clean up.')
+
+    # Copy data
+    new_args_file = get_args_file(i)
+    shutil.copy(args_file, new_args_file)
+    try:
+        os.unlink(get_position_file(new_args_file))
+    except FileNotFoundError:
+        pass
+    print(f'Arguments file copied to {new_args_file}')
+else:
+    new_args_file = args_file
+    print(f'Resuming from the arguments file "{new_args_file}"')
+
 # args_file_main = args_file
-# args_file_base = os.path.splitext(os.path.basename(args_file_main))[0]
+#
 #
 #
 # # # If restart is required, regenerate all files
@@ -105,7 +159,6 @@ args_file = input_args.args_file
 # #     line_count = id
 # # else:
 
-print("Resuming simulation with the same arguments file")
 
 # # Divide arguments into several files to avoid file access bottlenecks
 # MAX_CONCURRENT = 500
@@ -142,7 +195,7 @@ if script_name == 'job_manager.py':
     popens = []
     pids = []
     for j in range(1, jobs_count + 1):
-        cur_popen = subprocess.Popen([python_name, script_name + " " + args_file])
+        cur_popen = subprocess.Popen([python_name, script_name + " " + new_args_file])
         popens.append(cur_popen)
         pids.append(cur_popen.pid)
     print("Launched %i local job managers" % (jobs_count))
@@ -157,14 +210,14 @@ if script_name == 'job_manager.py':
 else:
     # Launch on dedicated, tars
     if input_args.dedicated:
-        cmd_str = f'sbatch --array=1-{jobs_count:d} {script_name} {args_file}'
+        cmd_str = f'sbatch --array=1-{jobs_count:d} {script_name} {new_args_file}'
         # print(cmd_str)
         # /dev/null
         os.system(cmd_str)
-        print(f'Submitted {jobs_count} jobs to "dbc_pmo". Processing: {args_file}.')
+        print(f'Submitted {jobs_count} jobs to "dbc_pmo". Processing: {new_args_file}.')
 
     # Launch on common, tars
     if input_args.common:
-        cmd_str = f'sbatch --array=1-{jobs_count_tars_common:d} {script_name_common} {args_file}'
+        cmd_str = f'sbatch --array=1-{jobs_count_tars_common:d} {script_name_common} {new_args_file}'
         os.system(cmd_str)
-        print(f'Submitted {jobs_count_tars_common} jobs to "common". Processing: {args_file}.')
+        print(f'Submitted {jobs_count_tars_common} jobs to "common". Processing: {new_args_file}.')
