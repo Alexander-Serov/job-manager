@@ -23,7 +23,7 @@ from stopwatch import stopwatch
 
 EXIT_SUCCESS = 0
 EXIT_INTERRUPTED = 'Program interrupted per user request'
-EXIT_TIMEOUT = 0    # 'Timeout waiting for lock on the position file'
+EXIT_TIMEOUT = 0  # 'Timeout waiting for lock on the position file'
 EXIT_PARENT_UNEXPECTED = 'Unexpected parent exit. This line should not have been reached.'
 
 time_start = time.time()
@@ -47,6 +47,21 @@ else:
     stop_file = '<none>'
 print(f'To stop these calculations create a file "{stop_file}" in the job-manager\'s folder')
 
+if len(sys.argv) > 3:
+    workers_count = int(sys.argv[3])
+else:
+    raise RuntimeError('You must provide the total workers count as the 3rd argument')
+
+# if len(sys.argv) > 4:
+#     shift = sys.argv[4]
+# else:
+#     raise RuntimeError('You must provide the initial id shift as the 4th argument')
+
+if len(sys.argv) > 4:
+    task_id = int(sys.argv[4]) - 1
+else:
+    raise RuntimeError('You must provide the job id as the 5th argument')
+
 
 # Check stop signal
 def check_stop():
@@ -56,7 +71,6 @@ def check_stop():
 
 
 check_stop()
-
 
 lock = FileLock(position_lock, timeout=lock_timeout)
 # Make sure the position file exists
@@ -79,20 +93,28 @@ def get_next_line():
     Reads the value from the position file and increases it by 1 if it does not exceed the number of
     lines in the argument file.
     """
-    try:
-        with stopwatch('Waiting for the lock'):
-            with lock:
-                with open(position_file, 'r') as fp_position:
-                    next_i = int(fp_position.read())
-                if next_i < max_lines:
-                    # Update the line number, but only if it is smaller than the file length
-                    with open(position_file, 'w') as fp_position:
-                        fp_position.write('{0:d}'.format(next_i + 1))
-
-    except Timeout as e:
-        print(f"Reached timeout ({lock_timeout} s) while waiting for the file lock.")
-        sys.exit(EXIT_TIMEOUT)
+    # try:
+    #     with stopwatch('Waiting for the lock'):
+    #         with lock:
+    #             with open(position_file, 'r') as fp_position:
+    #                 next_i = int(fp_position.read())
+    #             if next_i < max_lines:
+    #                 # Update the line number, but only if it is smaller than the file length
+    #                 with open(position_file, 'w') as fp_position:
+    #                     fp_position.write('{0:d}'.format(next_i + 1))
+    #
+    # except Timeout as e:
+    #     print(f"Reached timeout ({lock_timeout} s) while waiting for the file lock.")
+    #     sys.exit(EXIT_TIMEOUT)
+    next_i = get_next_line.pos * workers_count + task_id
+    get_next_line.pos += 1
     return next_i
+
+print(task_id, workers_count)
+
+get_next_line.pos = 0
+print('This instance will process the following strings fromt the arguments file:\n',
+      list(range(task_id, max_lines + 1, workers_count)))
 
 
 # Read the next in queue line in the arguments file

@@ -164,7 +164,7 @@ else:
 
 # # Divide arguments into several files to avoid file access bottlenecks
 # MAX_CONCURRENT = 500
-# workers = jobs_count_tars_common * input_args.common + jobs_count_tars * input_args.dedicated
+
 #
 # # Count the number of arguments
 # with open(args_file, 'r') as f:
@@ -191,6 +191,8 @@ else:
 # with open(args_file, 'w') as to_file:
 #     to_file.writelines(arguments[start:end])
 
+workers_count = jobs_count_tars_common * input_args.common + jobs_count_tars * input_args.dedicated
+
 # Launch job managers
 if script_name == 'job_manager.py':
     cmd_str = '{python_name} %s' % (script_name)
@@ -211,15 +213,19 @@ if script_name == 'job_manager.py':
 
 else:
     # Launch on dedicated, tars
+    shift = 0
     if input_args.dedicated:
-        cmd_str = f'sbatch --array=1-{jobs_count:d} {script_name} {new_args_file}'
+        cmd_str = f'sbatch --array=1-{jobs_count:d} {script_name} {new_args_file} ' \
+            f'{workers_count:d} {shift:d}'
         # print(cmd_str)
         # /dev/null
         os.system(cmd_str)
         print(f'Submitted {jobs_count} jobs to "dbc_pmo". Processing: {new_args_file}.')
 
+    shift = int(jobs_count_tars * input_args.dedicated)
     # Launch on common, tars
     if input_args.common:
-        cmd_str = f'sbatch --array=1-{jobs_count_tars_common:d} {script_name_common} {new_args_file}'
+        cmd_str = f'sbatch --array=1-{jobs_count_tars_common:d} {script_name_common} ' \
+            f'{new_args_file} {workers_count:d} {shift:d}'
         os.system(cmd_str)
         print(f'Submitted {jobs_count_tars_common} jobs to "common". Processing: {new_args_file}.')
