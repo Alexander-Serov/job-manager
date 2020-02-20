@@ -18,15 +18,17 @@ arg_parser = argparse.ArgumentParser(
 arg_parser.add_argument('args_file', action='store', nargs='?', type=str, default='arguments.dat')
 arg_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + str(version))
 
-mode_group = arg_parser.add_mutually_exclusive_group(required=True)
-mode_group.add_argument('--restart', action='store_true')
-mode_group.add_argument('--resume', action='store_true')
+# mode_group = arg_parser.add_mutually_exclusive_group(required=True)
+# mode_group.add_argument('--restart', action='store_true')
+# mode_group.add_argument('--resume', action='store_true')
 
-arg_parser.add_argument('--common', dest='common', action='store_true')
+arg_parser.add_argument('-c', '--common', dest='common', action='store_true')
 
 # dedicated_group = arg_parser.add_mutually_exclusive_group()
 # dedicated_group.add_argument('--dedicated', dest='dedicated', action='store_true')
-arg_parser.add_argument('--no-dedicated', dest='dedicated', action='store_false')
+arg_parser.add_argument('--nd', '--no-dedicated', dest='dedicated', action='store_false')
+# arg_parser.add_argument('--delay', dest='delay', action='store', type=float, help='Delay between '
+#                                                                                   'jobs in seconds')
 
 arg_parser.set_defaults(common=False, dedicated=True)
 
@@ -51,7 +53,7 @@ else:
 
 # Analyze if need to restart or resume
 input_args = arg_parser.parse_args()
-bl_restart = input_args.restart
+# bl_restart = input_args.restart
 args_file = input_args.args_file
 
 
