@@ -110,8 +110,6 @@ def get_next_line():
     get_next_line.pos += 1
     return next_i
 
-print(task_id, workers_count)
-
 get_next_line.pos = 0
 print('This instance will process the following strings fromt the arguments file:\n',
       list(range(task_id, max_lines + 1, workers_count)))
