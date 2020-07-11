@@ -12,7 +12,7 @@ n12_range = [1e3, 1e4]
 n12_points = 10
 n12s = np.logspace(log10(n12_range[0]), log10(n12_range[1]), num=n12_points)
 
-jobs_count_tars = 222  # 224
+jobs_count_tars = 204  # max: 224
 jobs_count_tars_common = 3000  # 1000
 jobs_count_t_bayes = 132
 jobs_count_onsager = 10
@@ -65,9 +65,11 @@ sleep_time = 0.2
 logs_folder = "./logs/"
 output_folder = "./output/"
 args_file = "arguments.dat"
+args_lock = "arguments.lock"
 position_file = 'position.dat'
+position_lock = 'position.lock'
 stop_file = 'stop'
-lock_timeout = 300  # s
+lock_timeout = 600	# s
 
 
 output_folder = './output/'

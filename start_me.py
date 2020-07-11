@@ -10,7 +10,7 @@ import shutil
 
 import numpy as np
 
-from constants import version, jobs_count
+from constants import version
 
 DEDICATED_DEFAULT_JOBS_COUNT = 204
 COMMON_DEFAULT_JOBS_COUNT = 2800
@@ -34,6 +34,10 @@ script_name_common = 'sbatch_tars_common.sh'
 hostname = socket.gethostname()
 if hostname.startswith('tars-submit'):
     script_name_dedicated = 'sbatch_tars.sh'
+elif hostname.startswith('maestro-submit'):
+    script_name_dedicated = ''
+    script_name_common = 'sbatch_tars_maestro.sh'
+    python_name = 'python3'
 elif hostname == 'patmos':
     script_name_dedicated = 'sbatch_t_bayes.sh'
 elif hostname == 'onsager-dbc':
