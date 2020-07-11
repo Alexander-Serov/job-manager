@@ -34,7 +34,7 @@ script_name_common = 'sbatch_tars_common.sh'
 hostname = socket.gethostname()
 if hostname.startswith('tars-submit'):
     script_name_dedicated = 'sbatch_tars.sh'
-if hostname.startswith('maestro-submit'):
+elif hostname.startswith('maestro-submit'):
     script_name_dedicated = ''
     script_name_common = 'sbatch_tars_maestro.sh'
     python_name = 'python3'
