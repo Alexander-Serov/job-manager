@@ -1,4 +1,5 @@
 #! /bin/bash
+#todo The script fails for an unknown reason for the moment. Need to explore further.
 
 # Sbatch options
 #SBATCH -J sync
