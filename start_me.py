@@ -136,7 +136,7 @@ else:
             cmd_str = f'sbatch --array=1-{jobs:d} {script} ' \
                       f'{new_args_file} {workers_count:d} {shift:d}'
             os.system(cmd_str)
-            print(f'Submitted {jobs} jobs to "dbc_pmo". Processing: {new_args_file}.')
+            print(f'Submitted {jobs} jobs to through {script}. Processing: {new_args_file}.')
             shift += jobs
 
     # if jobs_dedicated:  # Launch on TARS's dedicated partition
