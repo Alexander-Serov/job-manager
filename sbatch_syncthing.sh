@@ -21,7 +21,7 @@ logs_folder="./logs/"
 #module load Python/3.7.2
 srun -o "${logs_folder}log_job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.out" -e \
 "${logs_folder}log_job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.out" -J \
-"${SLURM_ARRAY_TASK_ID}" ~/syncthing --log-file="~/syncthing/log.log"
+"${SLURM_ARRAY_TASK_ID}" ~/syncthing/syncthing --log-file="~/syncthing/log.log"
 
 
 
